@@ -1,0 +1,14 @@
+The domain of the API is library system
+Create project
+Write unit tests
+Store data in SQLlite
+
+endpoints:
+/books
+    - GET: returns details of all the books
+    - POST: Adds a new book
+
+/books/{id}
+    - GET: Returns the book details for a specific ID
+    - PATCH: updates the book details with the ID provided
+    - DELETE: Deletes the book with the ID provided
