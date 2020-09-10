@@ -6,7 +6,6 @@ import jason.api.libraryapi.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +19,8 @@ public class BookController {
 
     @GetMapping("/books")
     public ResponseEntity<List<Book>> retrieveAllBooks() {
-        List<Book> list = (List<Book>) bookService.listAllBooks();
-        return new ResponseEntity<List<Book>>(list, HttpStatus.OK);
+        List<Book> list = bookService.listAllBooks();
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @GetMapping("/books/{id}")
@@ -31,7 +30,7 @@ public class BookController {
     }
 
     @PostMapping("/books")
-    public Book addNewBook(@Validated @RequestBody Book book) {
+    public Book addNewBook(@RequestBody Book book) {
         return bookService.addNewBook(book);
     }
 
