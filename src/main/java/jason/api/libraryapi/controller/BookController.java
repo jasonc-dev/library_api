@@ -2,7 +2,7 @@ package jason.api.libraryapi.controller;
 
 import jason.api.libraryapi.domain.Book;
 import jason.api.libraryapi.exception.ResourceNotFoundException;
-import jason.api.libraryapi.service.BookServiceImpl;
+import jason.api.libraryapi.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.List;
 public class BookController {
 
     @Autowired
-    private BookServiceImpl bookService;
+    private BookService bookService;
 
     @GetMapping("/books")
     public ResponseEntity<List<Book>> retrieveAllBooks() {
