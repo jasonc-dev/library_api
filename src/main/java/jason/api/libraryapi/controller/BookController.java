@@ -3,7 +3,6 @@ package jason.api.libraryapi.controller;
 import jason.api.libraryapi.domain.Book;
 import jason.api.libraryapi.exception.ResourceNotFoundException;
 import jason.api.libraryapi.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +10,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/library/books")
+@RequestMapping(BookController.BASE_URL)
 public class BookController {
 
-    @Autowired
-    private BookService bookService;
+    public static final String BASE_URL = "/library/books";
+
+    private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Book>> retrieveAllBooks() {
@@ -35,9 +39,9 @@ public class BookController {
     }
 
     @PatchMapping({"/{id}"})
-    public ResponseEntity<Book> updateExistingBook(@PathVariable(value = "id") Long bookId,
+    public ResponseEntity<Book> updateExistingBook(@PathVariable Long id,
                                           @RequestBody Book bookDetails) throws ResourceNotFoundException {
-        Book book = bookService.findBookById(bookId);
+        Book book = bookService.findBookById(id);
         book.setTitle(bookDetails.getTitle());
         book.setAuthor(bookDetails.getAuthor());
         bookService.addNewBook(book);
