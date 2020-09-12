@@ -1,138 +1,75 @@
 package jason.api.libraryapi.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jason.api.libraryapi.domain.Book;
+import jason.api.libraryapi.exception.RestResponseEntityExceptionHandler;
 import jason.api.libraryapi.service.BookService;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(BookController.class)
 public class BookControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    BookService bookService;
 
-    @MockBean
-    private BookService bookService;
+    @InjectMocks
+    BookController bookController;
 
-    @Test
-    public void getAllBooks() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/library/books"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json("[]"));
-        Mockito.verify(bookService, Mockito.times(1)).listAllBooks();
-    }
+    MockMvc mockMvc;
 
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
 
-    @Test
-    public void testAddNewBook() throws Exception {
-
-        Book newTestBook = new Book();
-        newTestBook.setId((long) 1);
-        newTestBook.setTitle("title1");
-        newTestBook.setAuthor("author1");
-
-        String inputInJson = this.mapToJson(newTestBook);
-
-        String URI = "library/books/1";
-
-        Mockito.when(bookService.addNewBook(Mockito.any(Book.class))).thenReturn(newTestBook);
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post(URI)
-                .accept(MediaType.APPLICATION_JSON).content(inputInJson)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-        MockHttpServletResponse response = result.getResponse();
-
-        String outputInJson = response.getContentAsString();
-
-        assertThat(outputInJson).isEqualTo(inputInJson);
-        AssertionErrors.assertEquals("test", HttpStatus.OK.value(), response.getStatus());
+        mockMvc = MockMvcBuilders.standaloneSetup(bookController)
+                .setControllerAdvice(new RestResponseEntityExceptionHandler())
+                .build();
     }
 
     @Test
-    public void testFindBookById() throws Exception {
+    public void retrieveAllBooks() throws Exception {
+        Book book1 = new Book();
+        book1.setTitle("Title1");
+        book1.setAuthor("Author1");
 
-        Book newTestBook = new Book();
-        newTestBook.setId((long) 1);
-        newTestBook.setTitle("title1");
-        newTestBook.setAuthor("author1");
+        Book book2 = new Book();
+        book2.setTitle("Title2");
+        book2.setAuthor("Author2");
 
-        String inputInJson = this.mapToJson(newTestBook);
+        when(bookService.listAllBooks()).thenReturn(Arrays.asList(book1, book2));
 
-        Mockito.when(bookService.findBookById(Mockito.anyLong())).thenReturn(newTestBook);
-
-        String URI = "library/books/1";
-        RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get(URI)
-                .accept(MediaType.APPLICATION_JSON);
-
-        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-        String expectedJson = this.mapToJson(newTestBook);
-        String outputInJson = result.getResponse().getContentAsString();
-        assertThat(outputInJson).isEqualTo(expectedJson);
+        mockMvc.perform(get("/library/books")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.books", hasSize(2)));
     }
 
     @Test
-    public void testListAllBooks() throws Exception {
-
-        Book newTestBook = new Book();
-        newTestBook.setId((long) 1);
-        newTestBook.setTitle("title1");
-        newTestBook.setAuthor("author1");
-
-        Book newTestBook2 = new Book();
-        newTestBook2.setId((long) 2);
-        newTestBook2.setTitle("title2");
-        newTestBook2.setAuthor("author2");
-
-        List<Book> bookList = new ArrayList<>();
-        bookList.add(newTestBook);
-        bookList.add(newTestBook2);
-
-        Mockito.when(bookService.listAllBooks()).thenReturn(bookList);
-
-        String URI = "/library/books";
-        RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get(URI)
-                .accept(MediaType.APPLICATION_JSON);
-
-        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-
-        String expectedJson = this.mapToJson(bookList);
-        String outputInJson = result.getResponse().getContentAsString();
-        assertThat(outputInJson).isEqualTo(expectedJson);
-
+    public void retrieveBookById() {
     }
 
-
-    private String mapToJson(Object object) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(object);
+    @Test
+    public void addNewBook() {
     }
 
+    @Test
+    public void updateExistingBook() {
+    }
+
+    @Test
+    public void deleteBook() {
+    }
 }

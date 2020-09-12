@@ -11,30 +11,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/library")
+@RequestMapping("/library/books")
 public class BookController {
 
     @Autowired
     private BookService bookService;
 
-    @GetMapping("/books")
+    @GetMapping
     public ResponseEntity<List<Book>> retrieveAllBooks() {
         List<Book> list = bookService.listAllBooks();
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping({"/{id}"})
     public ResponseEntity<Book> retrieveBookById(@PathVariable(value = "id") Long bookId) throws ResourceNotFoundException {
         Book book = bookService.findBookById(bookId);
         return ResponseEntity.ok().body(book);
     }
 
-    @PostMapping("/books")
+    @PostMapping
     public Book addNewBook(@RequestBody Book book) {
         return bookService.addNewBook(book);
     }
 
-    @PatchMapping("/books/{id}")
+    @PatchMapping({"/{id}"})
     public ResponseEntity<Book> updateExistingBook(@PathVariable(value = "id") Long bookId,
                                           @RequestBody Book bookDetails) throws ResourceNotFoundException {
         Book book = bookService.findBookById(bookId);
@@ -44,10 +44,10 @@ public class BookController {
         return ResponseEntity.ok().body(book);
     }
 
-    @DeleteMapping("/books/{id}")
-    public ResponseEntity<?> deleteBook(@PathVariable(value = "id") Long bookId) throws ResourceNotFoundException {
-        bookService.findBookById(bookId);
-        bookService.deleteBookById(bookId);
+    @DeleteMapping({"/{id}"})
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) throws ResourceNotFoundException {
+        bookService.findBookById(id);
+        bookService.deleteBookById(id);
         return ResponseEntity.ok().build();
     }
 }
