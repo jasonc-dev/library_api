@@ -28,6 +28,15 @@ public class BookServiceImpl implements BookService {
         return book;
     }
 
+    @Override
+    public Book patchBook(Long id, Book book) {
+        return bookRepository.findById(id).map(updatedBook -> {
+                updatedBook.setTitle(book.getTitle());
+                updatedBook.setAuthor(book.getAuthor());
+                return bookRepository.save(updatedBook);
+        }).orElseThrow(RuntimeException::new);
+    }
+
     public void deleteBookById(Long id) {
         bookRepository.deleteById(id);
     }

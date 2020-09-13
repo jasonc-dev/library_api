@@ -12,5 +12,7 @@ public interface BookService {
 
     Book findBookById (Long id);
 
+    Book patchBook(Long id, Book book);
+
     void deleteBookById (Long id);
 }
